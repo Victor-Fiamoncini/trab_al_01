@@ -17,7 +17,7 @@ def main():
             [0, 2, -12],
         ]
 
-        result = sum(a=matrix_01, b=matrix_02)
+        result = subtraction(a=matrix_01, b=matrix_02)
 
         print(result)
     except Exception as ex:
@@ -35,7 +35,7 @@ def matrix_order(matrix):
 
 """
 Soma as duas matrizes informadas através de dois laços de repetição encadeados.
-A rotina vai criando novas linhas zeradas previamente às somas.
+A rotina cria novas linhas zeradas previamente às somas.
 """
 def sum(a, b):
     a_lines_length, a_columns_length = matrix_order(a)
@@ -52,6 +52,29 @@ def sum(a, b):
 
         for column_index in range(a_columns_length):
             c[line_index][column_index] = a[line_index][column_index] + \
+                b[line_index][column_index]
+
+    return c
+
+"""
+Substrai as duas matrizes informadas através de dois laços de repetição encadeados.
+A rotina cria novas linhas zeradas previamente às somas.
+"""
+def subtraction(a, b):
+    a_lines_length, a_columns_length = matrix_order(a)
+    b_lines_length, b_columns_length = matrix_order(b)
+
+    if a_lines_length != b_lines_length or a_columns_length != b_columns_length:
+        raise Exception('As matrizes informadas possuem ordens diferentes')
+
+    c = []
+
+    for line_index in range(a_lines_length):
+        empty_line = [0] * a_columns_length
+        c.append(empty_line)
+
+        for column_index in range(a_columns_length):
+            c[line_index][column_index] = a[line_index][column_index] - \
                 b[line_index][column_index]
 
     return c
