@@ -1,26 +1,65 @@
+from copy import deepcopy
+
 """
 Função main, onde o arquivo começa a ser interpretado
 """
-from re import A
-
-
 def main():
     try:
         matrix_01 = [
-            [2],
-            [3],
+            [2, 1, 6, 2],
+            [3, 4, 9, 0],
+            [2, 0, -5, 10],
+            [4, -2, -7, 1],
         ]
 
-        matrix_02 = [
-            [1, 2, 0],
-        ]
-
-        result = multiplication(a=matrix_01, b=matrix_02)
+        result = determinant(matrix_01)
 
         print(result)
     except Exception as ex:
         print(f'Ocorreu o seguinte erro: {ex}')
 
+"""
+Particiona a matriz informada através do índice da linha e da coluna informadas.
+Utilizada para obter a matriz reduzida para o cálculo do determinante por meio de Laplace.
+"""
+def sliced_matrix(matrix, line_index, column_index):
+    # Utilizei a função "deepcopy" para poder copiar o conteúdo que está endereço de memória da matriz original para um novo endereço de memória (o da matrix reduzida), não afetando assim os valores da matriz original.
+    new_sliced_matrix = deepcopy(matrix)
+
+    new_sliced_matrix.remove(matrix[line_index])
+
+    for new_column_index in range(len(new_sliced_matrix)):
+        new_sliced_matrix[new_column_index] \
+            .remove(new_sliced_matrix[new_column_index][column_index])
+
+    return new_sliced_matrix
+
+"""
+Calcula o determinante da matriz informada por meio dos cofatores (Laplace) caso sua ordem for >= 3.
+Caso contrário fará o cálculo por meio da regra de Sarrus.
+"""
+def determinant(matrix):
+    matrix_lines_length, matrix_columns_length = matrix_order(matrix)
+
+    for line_index in matrix:
+        if len(line_index) != matrix_lines_length:
+            raise Exception('A matriz deve ser quadrada')
+
+    if matrix_lines_length == 2:
+        two_order_matrix_determinant = matrix[0][0] * matrix[1][1] - \
+            matrix[0][1] * matrix[1][0]
+
+        return two_order_matrix_determinant
+
+    high_order_matrix_determinant = 0
+
+    for column_index in range(matrix_columns_length):
+        cofactor = (-1) ** (0 + column_index) * \
+            matrix[0][column_index] * determinant(sliced_matrix(matrix, 0, column_index))
+
+        high_order_matrix_determinant += cofactor
+
+    return high_order_matrix_determinant
 
 """
 Multiplica as duas matrizes informadas através de três laços de repetição encadeados.
@@ -31,7 +70,7 @@ def multiplication(a, b):
     b_lines_length, b_columns_length = matrix_order(b)
 
     if a_columns_length != b_lines_length:
-        raise Exception('A matriz A possui uma quantidade de linhas diferentes da quantidade de colunas da matriz B')
+        raise Exception('A matriz "A" possui uma quantidade de linhas diferentes da quantidade de colunas da matriz "B"')
 
     c = []
 
@@ -51,7 +90,6 @@ def multiplication(a, b):
 Retorna a ordem da matrix informada.
 """
 def matrix_order(matrix):
-
     matrix_lines_length = len(matrix)
     matrix_columns_length = len(matrix[0])
 
