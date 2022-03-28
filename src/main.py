@@ -12,11 +12,46 @@ def main():
             [4, -2, -7, 1],
         ]
 
-        result = determinant(matrix_01)
+        result = inverse(matrix_01)
 
         print(result)
     except Exception as ex:
         print(f'Ocorreu o seguinte erro: {ex}')
+
+"""
+Calcula a matrix identidade da matriz informada.
+"""
+def identity(matrix):
+    matrix_lines_length, _ = matrix_order(matrix)
+
+    for line_index in matrix:
+        if len(line_index) != matrix_lines_length:
+            raise Exception('A matriz deve ser quadrada')
+
+    indentity_matrix = []
+
+    for line_index in range(0, len(matrix)):
+        indentity_matrix.append([])
+
+        for column_index in range(0, len(matrix)):
+            if line_index == column_index:
+                indentity_matrix[line_index].append(1)
+            else:
+                indentity_matrix[line_index].append(0)
+
+    return indentity_matrix
+
+"""
+Calcula a matrix inversa da matriz informada.
+"""
+def inverse(matrix):
+    if determinant(matrix) == 0:
+        raise Exception('O determinante da matriz informada é 0, portanto ela não possui inversa')
+
+    copied_matrix = deepcopy(matrix)
+    indentity_matrix = identity(copied_matrix)
+
+    return indentity_matrix
 
 """
 Particiona a matriz informada através do índice da linha e da coluna informadas.
