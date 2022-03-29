@@ -1,100 +1,126 @@
 from copy import deepcopy
+import math
 
 """
 Função main, onde o arquivo começa a ser interpretado
 """
 def main():
     try:
-        matrix_01 = [
+        A = [
+            [2, 1, 6, 2, 4],
+            [3, 4, 9, 0, 4],
+            [2, 0, -5, 10, 4],
+            [4, -2, -7, 1, 4],
+            [4, -2, -7, 1, 10],
+        ]
+
+        B = [
             [2, 1, 6, 2],
             [3, 4, 9, 0],
             [2, 0, -5, 10],
             [4, -2, -7, 1],
         ]
 
-        result = inverse(matrix_01)
+        C = [
+            [2, 1, 6],
+            [3, 4, 9],
+            [2, 0, -5],
+        ]
 
-        print(result)
+        D = [
+            [2, 1],
+            [3, 4],
+        ]
+
+        matrix = A
+
+        det = determinant_validation(matrix, 1, 1)
+        cof = cofactor(matrix)
+
+        print(det, '\n')
+        print(cof, '\n')
     except Exception as ex:
         print(f'Ocorreu o seguinte erro: {ex}')
-
-"""
-Calcula a matrix identidade da matriz informada.
-"""
-def identity(matrix):
-    matrix_lines_length, _ = matrix_order(matrix)
-
-    for line_index in matrix:
-        if len(line_index) != matrix_lines_length:
-            raise Exception('A matriz deve ser quadrada')
-
-    indentity_matrix = []
-
-    for line_index in range(0, len(matrix)):
-        indentity_matrix.append([])
-
-        for column_index in range(0, len(matrix)):
-            if line_index == column_index:
-                indentity_matrix[line_index].append(1)
-            else:
-                indentity_matrix[line_index].append(0)
-
-    return indentity_matrix
-
-"""
-Calcula a matrix inversa da matriz informada.
-"""
-def inverse(matrix):
-    if determinant(matrix) == 0:
-        raise Exception('O determinante da matriz informada é 0, portanto ela não possui inversa')
-
-    copied_matrix = deepcopy(matrix)
-    indentity_matrix = identity(copied_matrix)
-
-    return indentity_matrix
-
-"""
-Particiona a matriz informada através do índice da linha e da coluna informadas.
-Utilizada para obter a matriz reduzida para o cálculo do determinante por meio de Laplace.
-"""
-def sliced_matrix(matrix, line_index, column_index):
-    # Utilizei a função "deepcopy" para poder copiar o conteúdo que está endereço de memória da matriz original para um novo endereço de memória (o da matrix reduzida), não afetando assim os valores da matriz original.
-    new_sliced_matrix = deepcopy(matrix)
-
-    new_sliced_matrix.remove(matrix[line_index])
-
-    for new_column_index in range(len(new_sliced_matrix)):
-        new_sliced_matrix[new_column_index] \
-            .remove(new_sliced_matrix[new_column_index][column_index])
-
-    return new_sliced_matrix
 
 """
 Calcula o determinante da matriz informada por meio dos cofatores (Laplace) caso sua ordem for >= 3.
 Caso contrário fará o cálculo por meio da regra de Sarrus.
 """
-def determinant(matrix):
-    matrix_lines_length, matrix_columns_length = matrix_order(matrix)
+def determinant_calculation(matrix):
+    counter = 2
+    determinant = 0
 
-    for line_index in matrix:
-        if len(line_index) != matrix_lines_length:
-            raise Exception('A matriz deve ser quadrada')
+    matrix_lines_length, matrix_column_length = matrix_order(matrix)
 
     if matrix_lines_length == 2:
-        two_order_matrix_determinant = matrix[0][0] * matrix[1][1] - \
-            matrix[0][1] * matrix[1][0]
+        return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]
 
-        return two_order_matrix_determinant
+    for line_index in range(0, matrix_column_length):
+        # Utilizei a função "deepcopy" para poder copiar o conteúdo que está endereço de memória da matriz original para um novo endereço de memória (o da matrix reduzida), não afetando assim os valores da matriz original.
+        copied_matrix = deepcopy(matrix)
+        copied_matrix.pop(0)
 
-    high_order_matrix_determinant = 0
+        for column_index in range(0, len(copied_matrix)):
+            copied_matrix[column_index].pop(line_index)
 
-    for column_index in range(matrix_columns_length):
-        cofactor = (-1) ** (0 + column_index) * \
-            matrix[0][column_index] * determinant(sliced_matrix(matrix, 0, column_index))
+        determinant = determinant + (-1) ** (counter) * matrix[0][line_index] * determinant_calculation(copied_matrix)
+        counter += 1
 
-        high_order_matrix_determinant += cofactor
+    return determinant
 
-    return high_order_matrix_determinant
+"""
+Valida se a matriz informada está apta para ocorrer o cálculo do determinante.
+"""
+def determinant_validation(matrix, line_index, column_index):
+    matrix_lines_length, _ = matrix_order(matrix)
+
+    if line_index < 0 or column_index < 0 or matrix_lines_length <= 1:
+        return Exception('A matriz informada é inválida')
+
+    for index in matrix:
+        if len(index) != matrix_lines_length:
+            raise Exception('A matriz informada deve ser quadrada')
+
+    formatted_matrix = []
+
+    for i in range(matrix_lines_length):
+        if i != line_index - 1:
+            temp_matrix = []
+
+            for j in range(len(matrix[i])):
+                if j != (column_index - 1):
+                    temp_matrix.append(matrix[i][j])
+
+            formatted_matrix.append(temp_matrix)
+
+    return determinant_calculation(formatted_matrix)
+
+"""
+Calcula a matrix dos cofatores a partir da matriz informada.
+"""
+def cofactor(matrix):
+    cofactor_matrix = []
+
+    matrix_lines_length, _ = matrix_order(matrix)
+
+    for line_index in range(matrix_lines_length):
+        cofactor_matrix.append([])
+
+        for column_index in range(matrix_lines_length):
+            determinant = determinant_validation(matrix, line_index + 1, column_index + 1)
+
+            cofactor_matrix[line_index].append(int(math.pow(-1, line_index + column_index) * determinant))
+
+    return cofactor_matrix
+
+"""
+Calcula a matrix inversa a partir da matriz dos cofatores.
+"""
+def inverse(matrix):
+    if determinant_calculation(matrix) == 0:
+        raise Exception('O determinante da matriz informada é 0, portanto ela não possui inversa')
+
+    pass
 
 """
 Multiplica as duas matrizes informadas através de três laços de repetição encadeados.
@@ -176,6 +202,8 @@ def subtraction(a, b):
 
     return c
 
-
+"""
+Chamada da função main
+"""
 if __name__ == "__main__":
     main()
