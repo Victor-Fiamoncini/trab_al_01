@@ -1,8 +1,8 @@
-from copy import deepcopy
+from copy import copy, deepcopy
 import math
 
 """
-Função main, onde o arquivo começa a ser interpretado
+Função main, onde o arquivo começa a ser interpretado.
 """
 def main():
     try:
@@ -34,7 +34,7 @@ def main():
 
         matrix = D
 
-        inv = inverse(matrix)
+        inv = high_order_inverse(matrix)
 
         print(inv)
     except Exception as ex:
@@ -54,7 +54,7 @@ def determinant_calculation(matrix):
         return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]
 
     for line_index in range(0, matrix_column_length):
-        # Utilizei a função "deepcopy" (função nativa da linguagem Python) para poder copiar o conteúdo que está endereço de memória da matriz original para um novo endereço de memória, não afetando assim os valores da matriz original.
+        # Utilizei a função "deepcopy" (função nativa da linguagem Python) para poder copiar o conteúdo que está no endereço de memória da matriz original para um novo endereço de memória, não afetando assim os valores da matriz original.
         copied_matrix = deepcopy(matrix)
         copied_matrix.pop(0)
 
@@ -125,9 +125,32 @@ def null_matrix(lines, columns):
     return matrix
 
 """
-Calcula a matrix inversa a partir da matriz dos cofatores.
+Calcula a matrix inversa de uma matrix 2x2.
+Usei uma dica que achei nesse vídeo: https://www.youtube.com/watch?v=F10TdwBH8qc
 """
-def inverse(matrix):
+def small_order_inverse(matrix):
+    matrix_lines_length, _ = matrix_order(matrix)
+
+    determinant = determinant_validation(matrix, 0, 0)
+
+    for i in range(matrix_lines_length):
+        for j in range(matrix_lines_length):
+            matrix[i][j] = matrix[i][j] / determinant
+
+    # Utilizei a função "copy" (função nativa da linguagem Python) para poder copiar o conteúdo que está no endereço de memória desta posição da matriz para um novo endereço de memória, não afetando assim o valor original da matriz.
+    aux = copy(matrix[0][0])
+    matrix[0][0] = matrix[1][1]
+    matrix[1][1] = aux
+
+    matrix[0][1] = -matrix[0][1]
+    matrix[1][0] = -matrix[1][0]
+
+    return matrix
+
+"""
+Calcula a matrix inversa (de ordem 3 ou maior) a partir da matriz dos cofatores.
+"""
+def high_order_inverse(matrix):
     matrix_lines_length, _ = matrix_order(matrix)
 
     for i in matrix:
@@ -136,6 +159,9 @@ def inverse(matrix):
 
     if determinant_calculation(matrix) == 0:
         raise Exception('O determinante da matriz informada é 0, portanto ela não possui inversa')
+
+    if matrix_lines_length == 2:
+        return small_order_inverse(matrix)
 
     determinant = determinant_validation(matrix, 0, 0)
 
@@ -250,7 +276,7 @@ def print_matrix(matrix):
     print('\n'.join(table), '\n')
 
 """
-Chamada da função main
+Chamada da função main.
 """
 if __name__ == "__main__":
     main()
