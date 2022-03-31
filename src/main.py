@@ -32,13 +32,11 @@ def main():
             [3, 4],
         ]
 
-        matrix = A
+        matrix = D
 
-        det = determinant_validation(matrix, 1, 1)
-        cof = cofactor(matrix)
+        inv = inverse(matrix)
 
-        print(det, '\n')
-        print(cof, '\n')
+        print(inv)
     except Exception as ex:
         print(f'Ocorreu o seguinte erro: {ex}')
 
@@ -56,7 +54,7 @@ def determinant_calculation(matrix):
         return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]
 
     for line_index in range(0, matrix_column_length):
-        # Utilizei a função "deepcopy" para poder copiar o conteúdo que está endereço de memória da matriz original para um novo endereço de memória (o da matrix reduzida), não afetando assim os valores da matriz original.
+        # Utilizei a função "deepcopy" (função nativa da linguagem Python) para poder copiar o conteúdo que está endereço de memória da matriz original para um novo endereço de memória, não afetando assim os valores da matriz original.
         copied_matrix = deepcopy(matrix)
         copied_matrix.pop(0)
 
@@ -70,6 +68,8 @@ def determinant_calculation(matrix):
 
 """
 Valida se a matriz informada está apta para ocorrer o cálculo do determinante.
+Optei por fazer uma função de validação, para que de forma prévia, possa mostrar algum possível erro na matrix que o usuário informou.
+Dessa forma apenas matrizes válidas serão chamadas na função recursiva (que por natureza ocupa muito mais memória e exige mais processamento).
 """
 def determinant_validation(matrix, line_index, column_index):
     matrix_lines_length, _ = matrix_order(matrix)
@@ -77,8 +77,8 @@ def determinant_validation(matrix, line_index, column_index):
     if line_index < 0 or column_index < 0 or matrix_lines_length <= 1:
         return Exception('A matriz informada é inválida')
 
-    for index in matrix:
-        if len(index) != matrix_lines_length:
+    for i in matrix:
+        if len(i) != matrix_lines_length:
             raise Exception('A matriz informada deve ser quadrada')
 
     formatted_matrix = []
@@ -114,13 +114,49 @@ def cofactor(matrix):
     return cofactor_matrix
 
 """
+Cria uma matrix nula a partir do número de linhas e colunas informados.
+"""
+def null_matrix(lines, columns):
+    matrix = []
+
+    for _ in range(lines):
+        matrix.append([0] * columns)
+
+    return matrix
+
+"""
 Calcula a matrix inversa a partir da matriz dos cofatores.
 """
 def inverse(matrix):
+    matrix_lines_length, _ = matrix_order(matrix)
+
+    for i in matrix:
+        if len(i) != matrix_lines_length:
+            raise Exception('A matriz informada deve ser quadrada')
+
     if determinant_calculation(matrix) == 0:
         raise Exception('O determinante da matriz informada é 0, portanto ela não possui inversa')
 
-    pass
+    determinant = determinant_validation(matrix, 0, 0)
+
+    cofactor_matrix = cofactor(matrix)
+    cofactor_matrix_lines_length, _ = matrix_order(cofactor_matrix)
+
+    transposed_matrix = null_matrix(cofactor_matrix_lines_length, cofactor_matrix_lines_length)
+
+    for i in range(matrix_lines_length):
+        for j in range(matrix_lines_length):
+            transposed_matrix[j][i] = cofactor_matrix[i][j]
+
+    transposed_matrix_lines_length, _ = matrix_order(cofactor_matrix)
+
+    inverse_matrix = null_matrix(transposed_matrix_lines_length, transposed_matrix_lines_length)
+
+    for i in range(matrix_lines_length):
+        for j in range(matrix_lines_length):
+            inverse_matrix[i][j] = round(transposed_matrix[i][j] * (1 / determinant), 3)
+
+    return inverse_matrix
 
 """
 Multiplica as duas matrizes informadas através de três laços de repetição encadeados.
@@ -201,6 +237,17 @@ def subtraction(a, b):
                 b[line_index][column_index]
 
     return c
+
+"""
+Exibe a matrix informada formatada no stdout.
+"""
+def print_matrix(matrix):
+    s = [[str(e) for e in line] for line in matrix]
+    lens = [max(map(len, col)) for col in zip(*s)]
+    fmt = '\t'.join('{{:{}}}'.format(x) for x in lens)
+    table = [fmt.format(*line) for line in s]
+
+    print('\n'.join(table), '\n')
 
 """
 Chamada da função main
