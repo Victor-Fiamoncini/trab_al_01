@@ -6,39 +6,108 @@ Função main, onde o arquivo começa a ser interpretado.
 """
 def main():
     try:
-        A = [
-            [2, 1, 6, 2, 4],
-            [3, 4, 9, 0, 4],
-            [2, 0, -5, 10, 4],
-            [4, -2, -7, 1, 4],
-            [4, -2, -7, 1, 10],
-        ]
+        lines_length = int(input('Informe o número de linhas da sua matrix: '))
+        columns_length = int(input('Informe o número de colunas da sua matrix: '))
 
-        B = [
-            [2, 1, 6, 2],
-            [3, 4, 9, 0],
-            [2, 0, -5, 10],
-            [4, -2, -7, 1],
-        ]
+        user_matrix = null_matrix(lines_length, columns_length)
 
-        C = [
-            [2, 1, 6],
-            [3, 4, 9],
-            [2, 0, -5],
-        ]
+        for i in range(lines_length):
+            for j in range(columns_length):
+                element = input(f'Informe o elemento {i + 1}x{j + 1} da sua matriz: ')
 
-        D = [
-            [2, 1],
-            [3, 4],
-        ]
+                user_matrix[i][j] = int(element)
 
-        matrix = D
+        def sum_with_other_matrix_option():
+            lines_length = int(input('Informe o número de linhas da segunda matrix: '))
+            columns_length = int(input('Informe o número de colunas da segunda matrix: '))
 
-        inv = high_order_inverse(matrix)
+            second_matrix = null_matrix(lines_length, columns_length)
 
-        print(inv)
+            for i in range(lines_length):
+                for j in range(columns_length):
+                    element = input(f'Informe o elemento {i + 1}x{j + 1} da segunda matriz: ')
+
+                    second_matrix[i][j] = int(element)
+
+            print('---------------------------------------------------------------')
+            print('A soma das duas matrizes é: ')
+            print_matrix(sum(deepcopy(user_matrix), second_matrix))
+
+        def subtract_with_other_matrix_option():
+            lines_length = int(input('Informe o número de linhas da segunda matrix: '))
+            columns_length = int(input('Informe o número de colunas da segunda matrix: '))
+
+            second_matrix = null_matrix(lines_length, columns_length)
+
+            for i in range(lines_length):
+                for j in range(columns_length):
+                    element = input(f'Informe o elemento {i + 1}x{j + 1} da segunda matriz: ')
+
+                    second_matrix[i][j] = int(element)
+
+            print('---------------------------------------------------------------')
+            print('O resultado da subtração das duas matrizes é: ')
+            print_matrix(subtraction(deepcopy(user_matrix), second_matrix))
+
+        def multiply_with_other_matrix_option():
+            lines_length = int(input('Informe o número de linhas da segunda matrix: '))
+            columns_length = int(input('Informe o número de colunas da segunda matrix: '))
+
+            second_matrix = null_matrix(lines_length, columns_length)
+
+            for i in range(lines_length):
+                for j in range(columns_length):
+                    element = input(f'Informe o elemento {i + 1}x{j + 1} da segunda matriz: ')
+
+                    second_matrix[i][j] = int(element)
+
+            print('---------------------------------------------------------------')
+            print('O resultado da multiplicação das duas matrizes é: ')
+            print_matrix(multiplication(deepcopy(user_matrix), second_matrix))
+
+        def matrix_determinant_option():
+            print('---------------------------------------------------------------')
+            print('O determinante da sua matriz é: ', determinant_validation(deepcopy(user_matrix), 0 , 0))
+
+        def inverse_matrix_option():
+            print('---------------------------------------------------------------')
+            print('A inversa da sua matriz é: ')
+            print_matrix(high_order_inverse(deepcopy(user_matrix)))
+
+        def exit_option():
+            exit()
+
+        program_options = {
+            1: sum_with_other_matrix_option,
+            2: subtract_with_other_matrix_option,
+            3: multiply_with_other_matrix_option,
+            4: matrix_determinant_option,
+            5: inverse_matrix_option,
+            6: exit_option
+        }
+
+        while True:
+            print('---------------------------------------------------------------')
+            print('Abaixo segue a sua matriz: ')
+            print_matrix(user_matrix)
+            print('---------------------------------------------------------------')
+            print('O que deseja fazer com ela?')
+            print('1 - Somar com outra matriz')
+            print('2 - Subtrair com outra matriz')
+            print('3 - Multiplicar com outra matriz')
+            print('4 - Calcular o determinante')
+            print('5 - Calcular a matriz inversa')
+            print('6 - Finalizar o programa')
+            print('---------------------------------------------------------------')
+
+            selected_option = int(input('Digite o número da opção desejada: '))
+
+            if selected_option in program_options:
+                program_options[selected_option]()
+            else:
+                print('Opção inválida')
     except Exception as ex:
-        print(f'Ocorreu o seguinte erro: {ex}')
+        print(f'PROGRAMA FINALIZADO -> ocorreu o seguinte erro: {ex}')
 
 """
 Calcula o determinante da matriz informada por meio dos cofatores (Laplace) caso sua ordem for >= 3.
@@ -273,7 +342,7 @@ def print_matrix(matrix):
     fmt = '\t'.join('{{:{}}}'.format(x) for x in lens)
     table = [fmt.format(*line) for line in s]
 
-    print('\n'.join(table), '\n')
+    print('\n'.join(table))
 
 """
 Chamada da função main.
